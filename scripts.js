@@ -1,10 +1,12 @@
 
 document.addEventListener("DOMContentLoaded", function(){
+	//debugger;
 	document.getElementById("submit").addEventListener("click", function(){
 	//debugger;
 	var seq = document.getElementById("input").value.replace(/\s+/g, '');
 	const readingFrames = [1, 2, 3, -1, -2, -3];
-	const outputDivs = document.getElementById("output").children; 
+	const outputDivs = document.getElementsByClassName("readingFrame");
+	console.log(outputDivs);
 	const orfs = [];
 	for (readingFrame in readingFrames){
 		const orfsPerReadingFrame = [];
@@ -30,9 +32,9 @@ document.addEventListener("DOMContentLoaded", function(){
 							stop = ">" + stop;
 						}
 						let newDiv = document.createElement("div")
-						let outputString = "start: " + start + " stop: " + stop + " length: " + length + " sequence: " + seq.substring(i, j+3);
-						let textNode = document.createTextNode(outputString);
-						newDiv.appendChild(textNode);
+						let outputString = "<b>start:</b> " + start + "  <b>stop:</b> " + stop + "  <b>length:</b> " + length + "</br> <b>sequence:</b> " + seq.substring(i, j+3);
+						newDiv.innerHTML = outputString;
+						
 						outputDivs[readingFrame].appendChild(newDiv);
 						stopCodonPresent = true;
 						break;

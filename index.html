@@ -2,22 +2,32 @@
 	<head>
 		<title>ORF Finder</title>
 		<script type="text/javascript" src="scripts.js"></script>
+		<link rel="stylesheet" type="text/css" href="styles.css">
 	</head>
 	<body>
-		<h1>Open Reading Frame Finder</h1>
-		<h3>An Open Reading Frame (ORF) is a sequence of DNA that has the potential to encode proteins. These sequences begin with a start codon, ATG, and ends with a stop codon, TAA, TAG, or TGA.</h3>
-		<h3>Enter a DNA sequence below to see the ORFs contained inside it</h3>
-		<textarea id="input" rows=5 ></textarea>
-		</br>
-		<button id="submit">submit</button>
-		<div id="output">
-			<div id="+1"><h3>Reading Frame: +1</h3></div>
-			<div id="+2"><h3>Reading Frame: +2</h3></div>
-			<div id="+3"><h3>Reading Frame: +3</h3></div>
-			<div id="-1"><h3>Reading Frame: -1</h3></div>
-			<div id="-2"><h3>Reading Frame: -2</h3></div>
-			<div id="-3"><h3>Reading Frame: -3</h3></div>
+		<div id="title">
+			<h1>Open Reading Frame Finder</h1>
 		</div>
+		<div id="container">
+			<div id="content">
+			<h3>An Open Reading Frame (ORF) is a sequence of DNA that has the potential to encode proteins. These sequences begin with a start codon, ATG, and ends with a stop codon, TAA, TAG, or TGA.</h3>
+			<h3>Enter a DNA sequence below to see the ORFs contained inside it</h3>
+			<div id="form">
+				<textarea id="input" ></textarea>
+				</br>
+				<button id="submit">submit</button>
+			</div>
+			<div id="output">
+				<div class="readingFrame"><h3>Reading Frame: +1</h3></div>
+				<div class="readingFrame"><h3>Reading Frame: +2</h3></div>
+				<div class="readingFrame"><h3>Reading Frame: +3</h3></div>
+				<div class="readingFrame"><h3>Reading Frame: -1</h3></div>
+				<div class="readingFrame"><h3>Reading Frame: -2</h3></div>
+				<div class="readingFrame"><h3>Reading Frame: -3</h3></div>
+			</div>
+			</div>
+		</div>
+		
 		
 		
 	</body>
