@@ -1,15 +1,22 @@
 
+var seq;
+var minLength;
+var readingFrames;
+var orfsPerReadingFrame;
+var outputDivs;
+var orfs;
+
 document.addEventListener("DOMContentLoaded", function(){
-	//debugger;
 	document.getElementById("submit").addEventListener("click", function(){
-	//debugger;
-	var seq = document.getElementById("input").value.replace(/\s+/g, '');
-	const readingFrames = [1, 2, 3, -1, -2, -3];
-	const outputDivs = document.getElementsByClassName("readingFrame");
-	console.log(outputDivs);
-	const orfs = [];
+	debugger;
+	removeOldResults();
+	seq = document.getElementById("input").value.replace(/\s+/g, '');
+	minLength = document.getElementById("minLength").value;
+	readingFrames = [1, 2, 3, -1, -2, -3];
+	outputDivs = document.getElementsByClassName("readingFrame");
+	orfs = [];
 	for (readingFrame in readingFrames){
-		const orfsPerReadingFrame = [];
+		orfsPerReadingFrame = [];
 		if (readingFrames[readingFrame] === -1){
 			//debugger;
 			//reverse string for first negative reading frame
@@ -20,23 +27,12 @@ document.addEventListener("DOMContentLoaded", function(){
 				//search for stop codon
 				let lastCodon = seq.length-(seq.length%3)-3
 				for (let j = i+3; j <= lastCodon; j+=3){
-					if (seq.substring(j,j+3) === "TAA" 
+					if ((seq.substring(j,j+3) === "TAA" 
 						|| seq.substring(j,j+3) === "TAG" 
 						|| seq.substring(j,j+3) === "TGA" 
-						|| j === lastCodon){
-						orfsPerReadingFrame.push({start : i, stop : j+3, length : j+3-i, sequence : seq.substring(i, j+3)});
-						let start = i+1;
-						let stop = j+3;
-						let length = j+3-i;
-						if (j === lastCodon){
-							stop = ">" + stop;
-						}
-						let newDiv = document.createElement("div")
-						let outputString = "<b>start:</b> " + start + "  <b>stop:</b> " + stop + "  <b>length:</b> " + length + "</br> <b>sequence:</b> " + seq.substring(i, j+3);
-						newDiv.innerHTML = outputString;
-						
-						outputDivs[readingFrame].appendChild(newDiv);
-						stopCodonPresent = true;
+						|| j === lastCodon)
+						&& j+3-i>=minLength){
+						outputORF(i, j, j===lastCodon);
 						break;
 					}
 
@@ -51,5 +47,27 @@ document.addEventListener("DOMContentLoaded", function(){
 );
 });
 
-
-
+var removeOldResults = function(){
+	debugger;
+	var results = document.getElementsByClassName("result")
+	while (results.length > 0){
+		results[0].remove();
+	}
+}
+var outputORF = function(i, j, lastCodon){
+	let start = i+1;
+	let stop = j+3;
+	let length = j+3-i;
+	let sequence = seq.substring(i, j+3);
+	if (lastCodon === true){
+		stop = ">" + stop;
+		length = length + "+"
+	}
+	orfsPerReadingFrame.push({start : start, stop : stop, length : length, sequence : sequence});
+	let newDiv = document.createElement("div");
+	let outputString = "<b>start:</b> " + start + "  <b>stop:</b> " + stop + "  <b>length:</b> " + length + "</br> <b>sequence:</b> " +sequence;
+	newDiv.innerHTML = outputString;
+	newDiv.classList.add("result");
+	outputDivs[readingFrame].appendChild(newDiv);
+	stopCodonPresent = true;
+};

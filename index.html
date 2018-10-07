@@ -14,7 +14,14 @@
 			<h3>Enter a DNA sequence below to see the ORFs contained inside it</h3>
 			<div id="form">
 				<textarea id="input" ></textarea>
-				</br>
+				<span>Minimum ORF length (nucleotides)</span>
+				<select id="minLength">
+					<option value="30" selected>30</option>
+					<option value="75">75</option>
+					<option value="150">150</option>
+					<option value="300">300</option>
+					<option value="600">600</option>
+				</select>
 				<button id="submit">submit</button>
 			</div>
 			<div id="output">
