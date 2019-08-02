@@ -28,10 +28,8 @@ document.addEventListener("DOMContentLoaded", function () {
 				if (tseq.substring(i, i + 3) === "ATG") {
 					let lastCodon = tseq.length - (tseq.length % 3);
 					for (let j = i + 3; j <= lastCodon; j += 3) {
-						if (tseq.substring(j, j + 3) === "TAA"
-							|| tseq.substring(j, j + 3) === "TAG"
-							|| tseq.substring(j, j + 3) === "TGA"
-							|| j === lastCodon) {					
+						let tcodon=tseq.substring(j, j + 3);
+						if ( tcodon=== "TAA" || tcodon === "TAG" || tcodon === "TGA" || j === lastCodon) {					
 							if (j + 3 - i >= minLength) {
 								outputORF(i, j, j === lastCodon,tseq.length,readingFrames[readingFrame],tseq);
 							}
