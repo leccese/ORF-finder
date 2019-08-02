@@ -6,68 +6,97 @@ var orfsPerReadingFrame;
 var outputDivs;
 var orfs;
 
-document.addEventListener("DOMContentLoaded", function(){
-	document.getElementById("submit").addEventListener("click", function(){
-	debugger;
-	removeOldResults();
-	seq = document.getElementById("input").value.replace(/\s+/g, '');
-	minLength = document.getElementById("minLength").value;
-	readingFrames = [1, 2, 3, -1, -2, -3];
-	outputDivs = document.getElementsByClassName("readingFrame");
-	orfs = [];
-	for (readingFrame in readingFrames){
-		orfsPerReadingFrame = [];
-		if (readingFrames[readingFrame] === -1){
-			//debugger;
-			//reverse string for first negative reading frame
-			seq = seq.split("").reverse().join("");
-		}
-		for (let i = Math.abs(readingFrames[readingFrame])-1; i < seq.length-2; i+=3){
-			if (seq.substring(i, i+3) === "ATG"){
-				//search for stop codon
-				let lastCodon = seq.length-(seq.length%3)-3
-				for (let j = i+3; j <= lastCodon; j+=3){
-					if ((seq.substring(j,j+3) === "TAA" 
-						|| seq.substring(j,j+3) === "TAG" 
-						|| seq.substring(j,j+3) === "TGA" 
-						|| j === lastCodon)
-						&& j+3-i>=minLength){
-						outputORF(i, j, j===lastCodon);
-						break;
+document.addEventListener("DOMContentLoaded", function () {
+	document.getElementById("submit").addEventListener("click", function () {
+		removeOldResults();
+		let seq = document.getElementById("input").value.replace(/\s+/g, '');
+		let rseq=transStrand(seq);
+		let minLength = document.getElementById("minLength").value;
+		readingFrames = [1, 2, 3, -1, -2, -3];
+		outputDivs = document.getElementsByClassName("readingFrame");
+		orfs = [];
+		for (readingFrame in readingFrames) {
+			orfsPerReadingFrame = [];
+			let tseq="";
+			if (readingFrames[readingFrame] < 0) {
+				tseq=rseq;
+			}else{
+				tseq=seq;
+			}
+		
+			for (let i = Math.abs(readingFrames[readingFrame]) - 1; i < tseq.length - 2; i += 3) {
+				if (tseq.substring(i, i + 3) === "ATG") {
+					let lastCodon = tseq.length - (tseq.length % 3);
+					for (let j = i + 3; j <= lastCodon; j += 3) {
+						if (tseq.substring(j, j + 3) === "TAA"
+							|| tseq.substring(j, j + 3) === "TAG"
+							|| tseq.substring(j, j + 3) === "TGA"
+							|| j === lastCodon) {					
+							if (j + 3 - i >= minLength) {
+								outputORF(i, j, j === lastCodon,tseq.length,readingFrames[readingFrame],tseq);
+							}
+							i = j;
+							break;
+						}
 					}
-
 				}
 			}
-		}			
-		orfs.push(orfsPerReadingFrame);
-		}	
-		console.log(orfs)
+			orfs.push(orfsPerReadingFrame);
+		}
 	}
 
-);
+	);
 });
 
-var removeOldResults = function(){
-	debugger;
+var removeOldResults = function () {
 	var results = document.getElementsByClassName("result")
-	while (results.length > 0){
+	while (results.length > 0) {
 		results[0].remove();
 	}
 }
-var outputORF = function(i, j, lastCodon){
-	let start = i+1;
-	let stop = j+3;
-	let length = j+3-i;
-	let sequence = seq.substring(i, j+3);
-	if (lastCodon === true){
+var outputORF = function (i, j, lastCodon,len,rframe,seq) {
+	let start = i + 1;
+	let stop = j + 3;
+	let length = j + 3 - i;
+	let sequence = seq.substring(i, j + 3);
+	if (rframe<0){
+		start=len-start+1;
+		stop=len-stop+1;
+	}
+	if (lastCodon === true) {
 		stop = ">" + stop;
 		length = length + "+"
 	}
-	orfsPerReadingFrame.push({start : start, stop : stop, length : length, sequence : sequence});
+	
+	orfsPerReadingFrame.push({ start: start, stop: stop, length: length, sequence: sequence });
 	let newDiv = document.createElement("div");
-	let outputString = "<b>start:</b> " + start + "  <b>stop:</b> " + stop + "  <b>length:</b> " + length + "</br> <b>sequence:</b> " +sequence;
+	let outputString = "<b>start:</b> " + start + "  <b>stop:</b> " + stop + "  <b>length:</b> " + length + "</br> <b>sequence:</b> " + sequence;
 	newDiv.innerHTML = outputString;
 	newDiv.classList.add("result");
 	outputDivs[readingFrame].appendChild(newDiv);
 	stopCodonPresent = true;
 };
+
+function transStrand(seq) {
+    var baseT = {
+        "A": "T",
+        "T": "A",
+        "C": "G",
+        "G": "C"
+    };
+    var rSeq = seq.split("").reverse();
+
+    for (var i = 0; i < rSeq.length; i++) {
+        if (/[a-z]/.test(rSeq[i])){
+            rSeq[i] = baseT[rSeq[i].toUpperCase()];
+        }else{
+            rSeq[i] = baseT[rSeq[i]];
+        }  
+    }
+    return rSeq.join("");
+}
+
+function loadDemo() {
+	let demoseq = "ATGACCATGATTACGGATTCACTGGCCGTCGTTTTACAACGTCGTGACTGGGAAAACCCTGGCGTTACCCAACTTAATCGCCTTGCAGCACATCCCCCTTTCGCCAGCTGGCGTAATAGCGAAGAGGCCCGCACCGATCGCCCTTCCCAACAGTTGCGCAGCCTGAATGGCGAATGGCGCTTTGCCTGGTTTCCGGCACCAGAAGCGGTGCCGGAAAGCTGGCTGGAGTGCGATCTTCCTGAGGCCGATACTGTCGTCGTCCCCTCAAACTGGCAGATGCACGGTTACGATGCGCCCATCTACACCAACGTGACCTATCCCATTACGGTCAATCCGCCGTTTGTTCCCACGGAGAATCCGACGGGTTGTTACTCGCTCACATTTAATGTTGATGAAAGCTGGCTACAGGAAGGCCAGACGCGAATTATTTTTGATGGCGTTAACTCGGCGTTTCATCTGTGGTGCAACGGGCGCTGGGTCGGTTACGGCCAGGACAGTCGTTTGCCGTCTGAATTTGACCTGAGCGCATTTTTACGCGCCGGAGAAAACCGCCTCGCGGTGATGGTGCTGCGCTGGAGTGACGGCAGTTATCTGGAAGATCAGGATATGTGGCGGATGAGCGGCATTTTCCGTGACGTCTCGTTGCTGCATAAACCGACTACACAAATCAGCGATTTCCATGTTGCCACTCGCTTTAATGATGATTTCAGCCGCGCTGTACTGGAGGCTGAAGTTCAGATGTGCGGCGAGTTGCGTGACTACCTACGGGTAACAGTTTCTTTATGGCAGGGTGAAACGCAGGTCGCCAGCGGCACCGCGCCTTTCGGCGGTGAAATTATCGATGAGCGTGGTGGTTATGCCGATCGCGTCACACTACGTCTGAACGTCGAAAACCCGAAACTGTGGAGCGCCGAAATCCCGAATCTCTATCGTGCGGTGGTTGAACTGCACACCGCCGACGGCACGCTGATTGAAGCAGAAGCCTGCGATGTCGGTTTCCGCGAGGTGCGGATTGAAAATGGTCTGCTGCTGCTGAACGGCAAGCCGTTGCTGATTCGAGGCGTTAACCGTCACGAGCATCATCCTCTGCATGGTCAGGTCATGGATGAGCAGACGATGGTGCAGGATATCCTGCTGATGAAGCAGAACAACTTTAACGCCGTGCGCTGTTCGCATTATCCGAACCATCCGCTGTGGTACACGCTGTGCGACCGCTACGGCCTGTATGTGGTGGATGAAGCCAATATTGAAACCCACGGCATGGTGCCAATGAATCGTCTGACCGATGATCCGCGCTGGCTACCGGCGATGAGCGAACGCGTAACGCGAATGGTGCAGCGCGATCGTAATCACCCGAGTGTGATCATCTGGTCGCTGGGGAATGAATCAGGCCACGGCGCTAATCACGACGCGCTGTATCGCTGGATCAAATCTGTCGATCCTTCCCGCCCGGTGCAGTATGAAGGCGGCGGAGCCGACACCACGGCCACCGATATTATTTGCCCGATGTACGCGCGCGTGGATGAAGACCAGCCCTTCCCGGCTGTGCCGAAATGGTCCATCAAAAAATGGCTTTCGCTACCTGGAGAGACGCGCCCGCTGATCCTTTGCGAATACGCCCACGCGATGGGTAACAGTCTTGGCGGTTTCGCTAAATACTGGCAGGCGTTTCGTCAGTATCCCCGTTTACAGGGCGGCTTCGTCTGGGACTGGGTGGATCAGTCGCTGATTAAATATGATGAAAACGGCAACCCGTGGTCGGCTTACGGCGGTGATTTTGGCGATACGCCGAACGATCGCCAGTTCTGTATGAACGGTCTGGTCTTTGCCGACCGCACGCCGCATCCAGCGCTGACGGAAGCAAAACACCAGCAGCAGTTTTTCCAGTTCCGTTTATCCGGGCAAACCATCGAAGTGACCAGCGAATACCTGTTCCGTCATAGCGATAACGAGCTCCTGCACTGGATGGTGGCGCTGGATGGTAAGCCGCTGGCAAGCGGTGAAGTGCCTCTGGATGTCGCTCCACAAGGTAAACAGTTGATTGAACTGCCTGAACTACCGCAGCCGGAGAGCGCCGGGCAACTCTGGCTCACAGTACGCGTAGTGCAACCGAACGCGACCGCATGGTCAGAAGCCGGGCACATCAGCGCCTGGCAGCAGTGGCGTCTGGCGGAAAACCTCAGTGTGACGCTCCCCGCCGCGTCCCACGCCATCCCGCATCTGACCACCAGCGAAATGGATTTTTGCATCGAGCTGGGTAATAAGCGTTGGCAATTTAACCGCCAGTCAGGCTTTCTTTCACAGATGTGGATTGGCGATAAAAAACAACTGCTGACGCCGCTGCGCGATCAGTTCACCCGTGCACCGCTGGATAACGACATTGGCGTAAGTGAAGCGACCCGCATTGACCCTAACGCCTGGGTCGAACGCTGGAAGGCGGCGGGCCATTACCAGGCCGAAGCAGCGTTGTTGCAGTGCACGGCAGATACACTTGCTGATGCGGTGCTGATTACGACCGCTCACGCGTGGCAGCATCAGGGGAAAACCTTATTTATCAGCCGGAAAACCTACCGGATTGATGGTAGTGGTCAAATGGCGATTACCGTTGATGTTGAAGTGGCGAGCGATACACCGCATCCGGCGCGGATTGGCCTGAACTGCCAGCTGGCGCAGGTAGCAGAGCGGGTAAACTGGCTCGGATTAGGGCCGCAAGAAAACTATCCCGACCGCCTTACTGCCGCCTGTTTTGACCGCTGGGATCTGCCATTGTCAGACATGTATACCCCGTACGTCTTCCCGAGCGAAAACGGTCTGCGCTGCGGGACGCGCGAATTGAATTATGGCCCACACCAGTGGCGCGGCGACTTCCAGTTCAACATCAGCCGCTACAGTCAACAGCAACTGATGGAAACCAGCCATCGCCATCTGCTGCACGCGGAAGAAGGCACATGGCTGAATATCGACGGTTTCCATATGGGGATTGGTGGCGACGACTCCTGGAGCCCGTCAGTATCGGCGGAATTCCAGCTGAGCGCCGGTCGCTACCATTACCAGTTGGTCTGGTGTCAAAAATAA";
+	document.getElementById("input").value=demoseq;
+}
