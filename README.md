@@ -17,3 +17,4 @@ To-Do:
 3. Alternative start codon option
 4. Import nucleotide sequence from NCBI .fna file
 5. Included nested ORFs
+6. Incomplete termination codons
